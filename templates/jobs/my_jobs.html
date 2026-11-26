@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}My Jobs | CareerConnect{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between mb-3">
+  <h2>My Posted Jobs</h2><a href="{% url 'post_job' %}" class="btn btn-primary">+ Post a Job</a>
+</div>
+<table class="table table-striped align-middle">
+  <thead><tr><th>Title</th><th>Location</th><th>Applicants</th><th></th></tr></thead>
+  <tbody>
+  {% for job in jobs %}
+    <tr>
+      <td><a href="{% url 'job_detail' job.id %}">{{ job.title }}</a></td>
+      <td>{{ job.location }}</td>
+      <td>{{ job.applications.count }}</td>
+      <td class="text-end">
+        <a href="{% url 'applicants' job.id %}" class="btn btn-sm btn-outline-primary">Applicants</a>
+        <form action="{% url 'delete_job' job.id %}" method="post" class="d-inline" onsubmit="return confirm('Delete this job?');">
+          {% csrf_token %}<button class="btn btn-sm btn-outline-danger">Delete</button>
+        </form>
+      </td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="4" class="text-muted">You haven't posted any jobs yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

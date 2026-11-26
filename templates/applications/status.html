@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Application Status | CareerConnect{% endblock %}
+{% block content %}
+{% if role == 'seeker' %}
+  <h2 class="mb-3">My Applications</h2>
+  <table class="table table-striped">
+    <thead><tr><th>Job</th><th>Company</th><th>Applied On</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for app in applications %}
+      <tr>
+        <td><a href="{% url 'job_detail' app.job.id %}">{{ app.job.title }}</a></td>
+        <td>{{ app.job.company }}</td>
+        <td>{{ app.applied_at|date:"d M Y" }}</td>
+        <td><span class="badge {% if app.status == 'shortlisted' %}bg-success{% elif app.status == 'rejected' %}bg-danger{% elif app.status == 'reviewed' %}bg-info{% else %}bg-secondary{% endif %}">{{ app.get_status_display }}</span></td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="4" class="text-muted">No applications yet. <a href="{% url 'jobs' %}">Browse jobs</a></td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <h2 class="mb-3">Applications Received</h2>
+  <table class="table table-striped align-middle">
+    <thead><tr><th>Job</th><th>Domain</th><th>Total Applicants</th><th></th></tr></thead>
+    <tbody>
+    {% for job in jobs %}
+      <tr>
+        <td>{{ job.title }}</td><td>{{ job.domain }}</td>
+        <td><span class="badge bg-primary">{{ job.n }}</span></td>
+        <td class="text-end"><a href="{% url 'applicants' job.id %}" class="btn btn-sm btn-outline-primary">View applicant details</a></td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="4" class="text-muted">You have not posted any jobs. <a href="{% url 'post_job' %}">Post one</a></td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+{% endblock %}

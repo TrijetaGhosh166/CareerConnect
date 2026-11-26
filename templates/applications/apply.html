@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Apply | CareerConnect{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-7">
+  <h2>Apply: {{ job.title }}</h2>
+  <p class="text-muted">{{ job.company }} &middot; {{ job.domain }} &middot; {{ job.location }}</p>
+  <p style="white-space: pre-line;">{{ job.description }}</p>
+  <hr>
+  <p class="small text-muted">Your profile details (name, CGPA, skills, experience) will be shared with the recruiter.
+    Resume on profile: {% if seeker.resume %}<a href="{{ seeker.resume.url }}" target="_blank">view</a>{% else %}none{% endif %}</p>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="mb-3">
+        <label class="form-label">{{ field.label }}</label>{{ field }}
+        {% for e in field.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+      </div>
+    {% endfor %}
+    <button class="btn btn-primary">Submit Application</button>
+  </form>
+</div></div>
+<script>
+  document.querySelectorAll('form input, form textarea').forEach(function (el) {
+    if (el.type !== 'hidden') el.classList.add('form-control');
+  });
+</script>
+{% endblock %}

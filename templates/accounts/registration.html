@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Register | CareerConnect{% endblock %}
+{% block content %}
+<h2 class="text-center mb-4">Join CareerConnect as...</h2>
+<form method="post" class="row justify-content-center g-3">
+  {% csrf_token %}
+  <div class="col-md-4">
+    <input type="radio" class="btn-check" name="role" id="seeker" value="seeker" required>
+    <label class="btn btn-outline-primary w-100 p-4" for="seeker"><h4>Job Seeker</h4><small>Find and apply for jobs</small></label>
+  </div>
+  <div class="col-md-4">
+    <input type="radio" class="btn-check" name="role" id="recruiter" value="recruiter">
+    <label class="btn btn-outline-primary w-100 p-4" for="recruiter"><h4>Recruiter</h4><small>Post jobs and hire talent</small></label>
+  </div>
+  <div class="col-12 text-center"><button class="btn btn-primary px-5">Continue</button></div>
+</form>
+{% endblock %}

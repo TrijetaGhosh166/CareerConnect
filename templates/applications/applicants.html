@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Applicants | CareerConnect{% endblock %}
+{% block content %}
+<h2>Applicants for {{ job.title }} <span class="badge bg-primary">{{ applications|length }}</span></h2>
+<a href="{% url 'application_status' %}">&larr; Back</a>
+
+{% for app in applications %}
+  {% with sp=app.applicant.seeker_profile %}
+  <div class="card shadow-sm my-3"><div class="card-body">
+    <div class="d-flex justify-content-between flex-wrap">
+      <h5>{{ app.applicant.get_full_name|default:app.applicant.username }}</h5>
+      <form action="{% url 'update_status' app.id %}" method="post" class="d-flex gap-1">
+        {% csrf_token %}
+        <select name="status" class="form-select form-select-sm">
+          {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if app.status == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <button class="btn btn-sm btn-primary">Save</button>
+      </form>
+    </div>
+    <div class="row mt-2">
+      <div class="col-md-6">
+        <p class="mb-1"><strong>Email:</strong> {{ app.applicant.email }}</p>
+        <p class="mb-1"><strong>Mobile:</strong> {{ app.applicant.profile.phone }}</p>
+        <p class="mb-1"><strong>Institution:</strong> {{ sp.institution|default:"-" }}</p>
+        <p class="mb-1"><strong>Location:</strong> {{ sp.location|default:"-" }}</p>
+        <p class="mb-1"><strong>CGPA / Marks:</strong> {{ sp.cgpa|default_if_none:"-" }}</p>
+        <p class="mb-1"><strong>Field:</strong> {{ sp.field_of_study|default:"-" }}</p>
+      </div>
+      <div class="col-md-6">
+        <p class="mb-1"><strong>Skills:</strong> {{ sp.skills|join:", "|default:"-" }}</p>
+        <p class="mb-1"><strong>Experience:</strong> {% if sp.experience_years %}{{ sp.experience_years }} yrs{% if sp.company_name %} at {{ sp.company_name }}{% endif %}{% else %}-{% endif %}</p>
+        <p class="mb-1"><strong>Languages:</strong> {{ sp.preferred_language|default:"-" }}</p>
+        <p class="mb-1"><strong>Achievements:</strong> {{ sp.achievements|default:"-" }}</p>
+        <p class="mb-1"><strong>Resume:</strong> {% if app.resume_file %}<a href="{{ app.resume_file.url }}" target="_blank">Download</a>{% else %}-{% endif %}</p>
+      </div>
+    </div>
+    {% if app.cover_letter %}<hr><p class="mb-0"><strong>Cover letter:</strong> {{ app.cover_letter }}</p>{% endif %}
+  </div></div>
+  {% endwith %}
+{% empty %}
+  <p class="text-muted mt-3">No applicants yet.</p>
+{% endfor %}
+{% endblock %}

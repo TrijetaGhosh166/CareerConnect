@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% if not user.is_authenticated %}
+<div class="p-5 mb-4 bg-light rounded-3 text-center">
+  <h1 class="display-5 fw-bold">Find your next career move</h1>
+  <p class="lead">Register as a Job Seeker or Recruiter to get started.</p>
+  <a href="{% url 'registration' %}" class="btn btn-primary">Register</a>
+  <a href="{% url 'login' %}" class="btn btn-outline-primary">Login</a>
+</div>
+{% endif %}
+
+{# ---------- 1. PROFILE SECTION ---------- #}
+{% if user.is_authenticated and role %}
+<section id="profile" class="mb-5">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h3>My Profile</h3>
+    <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary btn-sm">Edit Profile</a>
+  </div>
+  <div class="card shadow-sm"><div class="card-body">
+    <h5>{{ user.get_full_name }} <small class="text-muted">({% if role == 'seeker' %}Job Seeker{% else %}Recruiter{% endif %})</small></h5>
+    <p class="mb-2">Email: {{ user.email }} &middot; Mobile: {{ user.profile.phone }}</p>
+
+    {% if role == 'seeker' %}
+      {% if not seeker.is_complete %}
+        <div class="alert alert-warning">Profile incomplete. Add CGPA, field and Skill 1 to apply for jobs.
+          <a href="{% url 'edit_profile' %}">Complete now</a></div>
+      {% endif %}
+      <div class="row">
+        <div class="col-md-6">
+          <p class="mb-1"><strong>Institution:</strong> {{ seeker.institution|default:"-" }}</p>
+          <p class="mb-1"><strong>Location:</strong> {{ seeker.location|default:"-" }}</p>
+          <p class="mb-1"><strong>CGPA / Marks:</strong> {{ seeker.cgpa|default_if_none:"-" }}</p>
+          <p class="mb-1"><strong>Field:</strong> {{ seeker.field_of_study|default:"-" }}</p>
+        </div>
+        <div class="col-md-6">
+          <p class="mb-1"><strong>Skills:</strong> {{ seeker.skills|join:", "|default:"-" }}</p>
+          <p class="mb-1"><strong>Experience:</strong> {% if seeker.experience_years %}{{ seeker.experience_years }} yrs {% if seeker.company_name %}at {{ seeker.company_name }}{% endif %}{% else %}-{% endif %}</p>
+          <p class="mb-1"><strong>Preferred language:</strong> {{ seeker.preferred_language|default:"-" }}</p>
+          <p class="mb-1"><strong>Resume:</strong> {% if seeker.resume %}<a href="{{ seeker.resume.url }}" target="_blank">View</a>{% else %}Not uploaded{% endif %}</p>
+        </div>
+      </div>
+    {% else %}
+      {% if not recruiter.is_complete %}
+        <div class="alert alert-warning">Profile incomplete. Add company name, job domain and contact details.
+          <a href="{% url 'edit_profile' %}">Complete now</a></div>
+      {% endif %}
+      <p class="mb-1"><strong>Company:</strong> {{ recruiter.company_name|default:"-" }}</p>
+      <p class="mb-1"><strong>Job domain:</strong> {{ recruiter.job_domain|default:"-" }}</p>
+      <p class="mb-1"><strong>Description:</strong> {{ recruiter.job_description|default:"-" }}</p>
+      <p class="mb-1"><strong>Contact:</strong> {{ recruiter.contact_details|default:"-" }}</p>
+      <p class="mb-1"><strong>Google Form:</strong> {% if recruiter.google_form_link %}<a href="{{ recruiter.google_form_link }}" target="_blank">Open form</a>{% else %}-{% endif %}</p>
+      <a href="{% url 'post_job' %}" class="btn btn-primary btn-sm mt-2">+ Post a Job</a>
+    {% endif %}
+  </div></div>
+</section>
+{% endif %}
+
+{# ---------- 2. JOBS SECTION ---------- #}
+<section id="jobs" class="mb-5">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h3>Jobs</h3><a href="{% url 'jobs' %}">See all jobs &rarr;</a>
+  </div>
+  <div class="row g-3">
+    {% for job in jobs %}
+      <div class="col-md-4">{% include 'core/_job_card.html' %}</div>
+    {% empty %}
+      <p class="text-muted">No jobs posted yet.</p>
+    {% endfor %}
+  </div>
+</section>
+
+{# ---------- 3. APPLICATION STATUS SECTION ---------- #}
+{% if user.is_authenticated and role %}
+<section id="status" class="mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h3>Application Status</h3><a href="{% url 'application_status' %}">View all &rarr;</a>
+  </div>
+  {% if role == 'seeker' %}
+    <table class="table table-striped">
+      <thead><tr><th>Job</th><th>Company</th><th>Status</th></tr></thead>
+      <tbody>
+      {% for app in applications %}
+        <tr><td>{{ app.job.title }}</td><td>{{ app.job.company }}</td><td><span class="badge bg-primary">{{ app.get_status_display }}</span></td></tr>
+      {% empty %}
+        <tr><td colspan="3" class="text-muted">You have not applied to any job yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <table class="table table-striped align-middle">
+      <thead><tr><th>Job</th><th>Applicants</th><th></th></tr></thead>
+      <tbody>
+      {% for job in my_jobs %}
+        <tr><td>{{ job.title }}</td><td><span class="badge bg-primary">{{ job.n }}</span></td>
+            <td><a href="{% url 'applicants' job.id %}" class="btn btn-sm btn-outline-primary">View applicants</a></td></tr>
+      {% empty %}
+        <tr><td colspan="3" class="text-muted">You have not posted any job yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}
